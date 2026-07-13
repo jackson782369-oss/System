@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The System</title>
+<meta name="description" content="Daily goal system: gratitude, self improvement, balance, stress.">
+<meta name="theme-color" content="#1E3A34">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="The System">
+<style>
+  html, body { margin:0; padding:0; background:#F6F2E9; }
+</style>
+</head>
+<body>
+<div id="st-root"></div>
+<style>
+  #st-root {
+    --pine: #1E3A34;
+    --pine-soft: #2E4E46;
+    --fern: #5C8B6E;
+    --amber: #D9A441;
+    --clay: #B96B4E;
+    --stone: #8B8378;
+    --paper: #F6F2E9;
+    --card: #FFFFFF;
+    --line: #E5DFD0;
+    --ink: #23271F;
+
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+    max-width: 700px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    padding-bottom: 50px;
+  }
+  #st-root *, #st-root *::before, #st-root *::after { box-sizing: border-box; }
+
+  .st-header {
+    background: var(--pine);
+    padding: 26px 24px 0;
+    border-radius: 0 0 22px 22px;
+  }
+  .st-header-top { display:flex; justify-content:space-between; align-items:center; }
+  .st-brand { color: #EFE9D8; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; opacity: 0.75; }
+  .st-streak { color: var(--amber); font-size: 13px; font-weight: 700; }
+  .st-title { font-family: Georgia, serif; color: #fff; font-size: 26px; font-weight: 700; margin: 8px 0 16px; }
+
+  .st-tabs { display: flex; gap: 4px; padding: 0 4px; }
+  .st-tab {
+    flex: 1;
+    text-align: center;
+    padding: 11px 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #C8CFC4;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-radius: 10px 10px 0 0;
+    font-family: inherit;
+  }
+  .st-tab.active { color: var(--pine); background: var(--paper); }
+
+  .st-view { padding: 22px 20px 0; display: none; }
+  .st-view.active { display: block; }
+
+  .st-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 18px 18px 20px;
+    margin-bottom: 16px;
+  }
+  .st-eyebrow { font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--stone); font-weight: 700; margin-bottom: 4px; }
+  .st-h2 { font-family: Georgia, serif; font-size: 18px; font-weight: 700; margin: 0 0 6px; color: var(--pine); }
+  .st-p { font-size: 13.5px; color: #5A5748; line-height: 1.5; margin: 0 0 12px; }
+
+  .st-pillars { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px,1fr)); gap: 8px; }
+  .st-pillar {
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 8px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--stone);
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .st-pillar .st-pillar-icon { font-size: 20px; display:block; margin-bottom: 4px; }
+  .st-pillar.on { background: var(--pine); border-color: var(--pine); color: #fff; }
+
+  .st-goal-check {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-top: 1px solid var(--line);
+  }
+  .st-goal-check:first-child { border-top: none; }
+  .st-check-circle {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 2px solid var(--fern);
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .st-check-circle.done { background: var(--fern); }
+  .st-check-circle.done::after { content: "✓"; color: #fff; font-size: 13px; font-weight: 700; }
+  .st-goal-check-text { flex: 1; }
+  .st-goal-check-title { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .st-goal-check-sub { font-size: 12px; color: var(--stone); margin-top: 1px; }
+  .st-empty { font-size: 13px; color: var(--stone); font-style: italic; padding: 6px 0; }
+
+  .st-stress-btn {
+    width: 100%;
+    background: var(--paper);
+    border: 1.5px dashed var(--clay);
+    color: var(--clay);
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .st-stress-btn:hover { background: #FBF3ED; }
+
+  .st-sigh-box { text-align: center; padding: 10px 0 4px; }
+  .st-sigh-circle {
+    width: 110px; height: 110px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #E9D9C2, var(--amber));
+    margin: 0 auto 14px;
+    transition: transform 4s ease-in-out;
+  }
+  .st-sigh-circle.expand { transform: scale(1.35); }
+  .st-sigh-label { font-size: 13px; color: var(--stone); font-weight: 600; min-height: 18px; }
+  .st-sigh-instructions { font-size: 12.5px; color: var(--stone); margin-top: 10px; line-height: 1.5; }
+
+  .st-note {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 13.5px;
+    resize: none;
+    outline: none;
+    min-height: 46px;
+    margin-top: 8px;
+  }
+  .st-note:focus { border-color: var(--fern); }
+  .st-note::placeholder { color: #B5AFA0; }
+  .st-label { font-size: 12.5px; font-weight: 700; color: var(--ink); margin: 10px 0 2px; display: block; }
+  .st-input {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-family: inherit;
+    font-size: 13.5px;
+    outline: none;
+  }
+  .st-input:focus { border-color: var(--fern); }
+
+  .st-save {
+    width: 100%;
+    background: var(--pine);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 14.5px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 4px;
+  }
+  .st-save:hover { background: var(--pine-soft); }
+  .st-save.saved { background: var(--fern); }
+
+  /* Goals tab */
+  .st-goal-card {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+    background: var(--card);
+    border-left: 4px solid var(--fern);
+  }
+  .st-goal-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .st-goal-title { font-family: Georgia, serif; font-size: 16.5px; font-weight: 700; color: var(--pine); }
+  .st-goal-cadence {
+    font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    background: var(--paper); color: var(--stone); padding: 3px 8px; border-radius: 6px; white-space: nowrap;
+  }
+  .st-goal-identity { font-size: 13px; color: var(--fern); font-style: italic; margin: 6px 0 8px; }
+  .st-goal-system { font-size: 13px; color: #5A5748; margin-bottom: 8px; }
+  .st-goal-system b { color: var(--ink); }
+  .st-trail { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
+  .st-trail-dot {
+    width: 9px; height: 9px; border-radius: 50%; background: var(--line);
+  }
+  .st-trail-dot.hit { background: var(--fern); }
+  .st-goal-count { font-size: 11.5px; color: var(--stone); margin-top: 6px; }
+  .st-goal-remove { background: none; border: none; color: var(--line); font-size: 15px; cursor: pointer; }
+  .st-goal-remove:hover { color: var(--clay); }
+
+  .st-add-goal-btn {
+    width: 100%;
+    background: var(--pine);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 13px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    margin-bottom: 16px;
+  }
+  .st-goal-form { display: none; }
+  .st-goal-form.open { display: block; }
+  .st-goal-form-card {
+    background: var(--card); border: 1.5px solid var(--fern); border-radius: 14px; padding: 18px; margin-bottom: 16px;
+  }
+  .st-radio-row { display: flex; gap: 8px; margin-top: 4px; }
+  .st-radio-opt {
+    flex: 1; text-align: center; border: 1.5px solid var(--line); border-radius: 9px; padding: 9px; font-size: 13px;
+    cursor: pointer; font-weight: 600; color: var(--stone);
+  }
+  .st-radio-opt.sel { background: var(--fern); border-color: var(--fern); color: #fff; }
+  .st-form-actions { display: flex; gap: 8px; margin-top: 14px; }
+  .st-form-actions button {
+    flex: 1; padding: 11px; border-radius: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer; font-family: inherit; border: none;
+  }
+  .st-btn-cancel { background: var(--paper); color: var(--stone); border: 1px solid var(--line) !important; }
+  .st-btn-save-goal { background: var(--pine); color: #fff; }
+
+  .st-avoid-list { font-size: 13px; color: var(--stone); }
+  .st-avoid-item { padding: 6px 0; border-top: 1px dashed var(--line); display:flex; justify-content:space-between; align-items:center; }
+  .st-avoid-item:first-child { border-top: none; }
+  .st-promote-btn { font-size: 11px; color: var(--fern); background:none; border:1px solid var(--fern); border-radius: 6px; padding: 3px 8px; cursor:pointer; font-weight:700; }
+  .st-limit-note { font-size: 12px; color: var(--clay); background: #FBF3ED; border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; }
+
+  .st-status { text-align: center; font-size: 12px; color: var(--stone); margin: 8px 0 0; }
+
+  .st-bell {
+    background: rgba(255,255,255,0.12);
+    border: none;
+    border-radius: 8px;
+    width: 30px; height: 30px;
+    font-size: 14px;
+    cursor: pointer;
+    color: #fff;
+  }
+  .st-settings-wrap { padding: 14px 20px 0; }
+  .st-settings-card {
+    background: var(--card); border: 1.5px solid var(--pine); border-radius: 14px; padding: 16px 18px 18px;
+  }
+  .st-settings-row { display:flex; justify-content:space-between; align-items:center; margin: 10px 0; }
+  .st-toggle {
+    width: 42px; height: 24px; border-radius: 20px; background: var(--line); position: relative; cursor: pointer; flex-shrink:0;
+    transition: background 0.15s;
+  }
+  .st-toggle.on { background: var(--fern); }
+  .st-toggle-knob {
+    width: 18px; height: 18px; border-radius: 50%; background: #fff; position: absolute; top: 3px; left: 3px;
+    transition: left 0.15s; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+  .st-toggle.on .st-toggle-knob { left: 21px; }
+  .st-time-input {
+    border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-family: inherit; font-size: 13px;
+  }
+  .st-settings-note { font-size: 12px; color: var(--stone); line-height: 1.5; margin-top: 8px; }
+  .st-perm-btn {
+    background: var(--pine); color:#fff; border:none; border-radius:9px; padding: 8px 12px; font-size: 12.5px;
+    font-weight:700; cursor:pointer; font-family: inherit; margin-top: 6px;
+  }
+  .st-perm-status { font-size: 12px; color: var(--fern); font-weight: 600; margin-top: 6px; }
+
+  .st-banner {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    background: #FBF3ED; border: 1px solid var(--clay); color: var(--clay);
+    border-radius: 12px; padding: 11px 14px; font-size: 13px; font-weight: 600; margin-bottom: 14px;
+  }
+  .st-banner-dismiss { background:none; border:none; color:var(--clay); font-size:15px; cursor:pointer; flex-shrink:0; }
+
+  .st-quote-card {
+    background: var(--pine);
+    border-radius: 16px;
+    padding: 20px 20px 16px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .st-quote-mark {
+    font-family: Georgia, serif;
+    font-size: 46px;
+    color: var(--amber);
+    opacity: 0.5;
+    line-height: 0.6;
+    margin-bottom: 6px;
+  }
+  .st-quote-text {
+    font-family: Georgia, serif;
+    color: #fff;
+    font-size: 16.5px;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+  .st-quote-author {
+    color: var(--amber);
+    font-size: 12.5px;
+    font-weight: 700;
+    margin-top: 10px;
+    letter-spacing: 0.02em;
+  }
+</style>
+
+<script>
+// --- Storage shim: mirrors the Claude-artifact window.storage API using localStorage ---
+// This makes the app fully standalone (data lives only in this browser, on this device,
+// unless you use Backup & restore in Settings).
+window.storage = {
+  async get(key, shared) {
+    const raw = localStorage.getItem('goalapp:' + key);
+    if (raw === null) return null;
+    return { key, value: raw, shared: !!shared };
+  },
+  async set(key, value, shared) {
+    localStorage.setItem('goalapp:' + key, value);
+    return { key, value, shared: !!shared };
+  },
+  async delete(key, shared) {
+    localStorage.removeItem('goalapp:' + key);
+    return { key, deleted: true, shared: !!shared };
+  },
+  async list(prefix, shared) {
+    const p = 'goalapp:' + (prefix || '');
+    const keys = Object.keys(localStorage).filter(k => k.startsWith(p)).map(k => k.slice(8));
+    return { keys, prefix, shared: !!shared };
+  }
+};
+
+(function(){
+  const root = document.getElementById('st-root');
+  const PILLARS = [
+    {key:'sleep', label:'Sleep', icon:'🌙'},
+    {key:'sunlight', label:'Sunlight', icon:'☀️'},
+    {key:'movement', label:'Movement', icon:'🏃'},
+    {key:'nutrition', label:'Nutrition', icon:'🥗'},
+    {key:'people', label:'People', icon:'🤝'}
+  ];
+
+  const today = new Date();
+  function dayKey(d){ return d.toISOString().slice(0,10); }
+  function isoWeekKey(d){
+    const dt = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    const dayNum = dt.getUTCDay() || 7;
+    dt.setUTCDate(dt.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(dt.getUTCFullYear(),0,1));
+    const weekNo = Math.ceil((((dt - yearStart) / 86400000) + 1) / 7);
+    return dt.getUTCFullYear() + '-W' + String(weekNo).padStart(2,'0');
+  }
+  const todayKey = dayKey(today);
+  const weekKey = isoWeekKey(today);
+
+  let goals = [];        // {id,title,why,identity,system,cadence,measure,checkins:[dateStrings]}
+  let avoidList = [];    // {id,title}
+  let streak = 0;
+  let activeTab = 'today';
+
+  let todayEntry = { pillars:{}, goalChecks:{}, stressNote:'' };
+  let weekEntry = { gratThing:'', gratWhy:'', gratSubtract:'', gratPerson:'', goalNotes:{}, stressReflection:'' };
+  let savedToday = false;
+  let savedWeekly = false;
+
+  let goalFormOpen = false;
+  let sighRunning = false;
+  let settingsOpen = false;
+  let notifSettings = { enabled:false, time:'19:00' };
+  let notifFiredKey = null; // prevents re-firing within the same minute/day
+  let notifStatus = ''; // transient status message in settings panel
+  let backupStatus = '';
+
+  function uid(){ return 'g' + Math.random().toString(36).slice(2,9); }
+
+  function activeGoals(){ return goals; }
+  function dailyGoals(){ return goals.filter(g => g.cadence === 'daily'); }
+  function weeklyGoals(){ return goals.filter(g => g.cadence === 'weekly'); }
+
+  function checkinsThisWeek(g){
+    return (g.checkins||[]).filter(d => isoWeekKey(new Date(d)) === weekKey).length;
+  }
+
+  const QUOTES = [
+    { text: "You don't rise to your goals — you fall to your systems.", author: "James Clear" },
+    { text: "Play long-term games with long-term people.", author: "Naval Ravikant" },
+    { text: "Discipline equals freedom.", author: "Jocko Willink" },
+    { text: "You have power over your mind, not outside events.", author: "Marcus Aurelius" },
+    { text: "Grit is passion and perseverance for long-term goals.", author: "Angela Duckworth" },
+    { text: "Really successful people say no to almost everything.", author: "Warren Buffett" },
+    { text: "Gratitude is a felt sense of wonder and appreciation for life.", author: "Robert Emmons" },
+    { text: "Sleep is the foundation for mental and physical health.", author: "Andrew Huberman" },
+    { text: "Motivation gets you started. Discipline keeps you going.", author: "David Goggins" },
+    { text: "The only person you're competing with is who you were yesterday.", author: "Kobe Bryant" },
+    { text: "Small habits don't add up — they compound.", author: "James Clear" },
+    { text: "The hardest thing is not doing what you want — it's knowing what you want.", author: "Naval Ravikant" },
+    { text: "Detach, assess, then act — don't let stress make the decision for you.", author: "Jocko Willink" },
+    { text: "Choose what you can control. Let go of the rest.", author: "Marcus Aurelius" },
+    { text: "Effort counts twice — toward skill, and toward achievement.", author: "Angela Duckworth" },
+    { text: "It's not what you do, it's what you don't do, that matters most.", author: "Warren Buffett" },
+    { text: "Focus on people, not just things, to feel real gratitude.", author: "Robert Emmons" },
+    { text: "Get sunlight in your eyes early — it sets the whole day.", author: "Andrew Huberman" },
+    { text: "Purpose accumulates quietly, through steady, ordinary rhythms.", author: "Japanese ikigai philosophy" },
+    { text: "Stay hungry. Even after reaching a goal, the work isn't over.", author: "Jocko Willink" }
+  ];
+  function dailyQuote(){
+    const epoch = Date.UTC(2020,0,1);
+    const now = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+    const diffDays = Math.floor((now - epoch) / 86400000);
+    const idx = ((diffDays % QUOTES.length) + QUOTES.length) % QUOTES.length;
+    return QUOTES[idx];
+  }
+
+  function render(){
+    const dateStr = today.toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' });
+    root.innerHTML = `
+      <div class="st-header">
+        <div class="st-header-top">
+          <div class="st-brand">The System</div>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="st-streak">${streak > 0 ? '🔥 ' + streak + ' day streak' : ''}</div>
+            <button class="st-bell" id="st-bell-btn" title="Reminders">${notifSettings.enabled ? '🔔' : '🔕'}</button>
+          </div>
+        </div>
+        <div class="st-title">${activeTab === 'today' ? dateStr : (activeTab === 'goals' ? 'Your goals' : 'Weekly review · ' + weekKey)}</div>
+        <div class="st-tabs">
+          <button class="st-tab ${activeTab==='today'?'active':''}" data-tab="today">Today</button>
+          <button class="st-tab ${activeTab==='goals'?'active':''}" data-tab="goals">Goals</button>
+          <button class="st-tab ${activeTab==='weekly'?'active':''}" data-tab="weekly">Weekly review</button>
+        </div>
+      </div>
+
+      <div id="st-settings-panel"></div>
+
+      <div class="st-view ${activeTab==='today'?'active':''}" id="st-view-today"></div>
+      <div class="st-view ${activeTab==='goals'?'active':''}" id="st-view-goals"></div>
+      <div class="st-view ${activeTab==='weekly'?'active':''}" id="st-view-weekly"></div>
+    `;
+    root.querySelectorAll('.st-tab').forEach(t => t.addEventListener('click', () => { activeTab = t.dataset.tab; render(); }));
+    document.getElementById('st-bell-btn').addEventListener('click', () => { settingsOpen = !settingsOpen; renderSettings(); });
+    renderSettings();
+
+    if (activeTab === 'today') renderToday();
+    if (activeTab === 'goals') renderGoals();
+    if (activeTab === 'weekly') renderWeekly();
+  }
+
+  function renderSettings(){
+    const wrap = document.getElementById('st-settings-panel');
+    if (!settingsOpen) { wrap.innerHTML = ''; return; }
+    const permission = (typeof Notification !== 'undefined') ? Notification.permission : 'unsupported';
+    wrap.innerHTML = `
+      <div class="st-settings-wrap">
+        <div class="st-settings-card">
+          <div class="st-eyebrow">Reminders</div>
+          <div class="st-h2">Nudge me to log</div>
+          <div class="st-settings-row">
+            <span>Daily reminder</span>
+            <div class="st-toggle ${notifSettings.enabled ? 'on' : ''}" id="st-notif-toggle"><div class="st-toggle-knob"></div></div>
+          </div>
+          <div class="st-settings-row">
+            <span>Remind me at</span>
+            <input type="time" class="st-time-input" id="st-notif-time" value="${notifSettings.time}">
+          </div>
+          ${permission === 'granted'
+            ? '<div class="st-perm-status">✓ Browser notifications allowed</div>'
+            : `<button class="st-perm-btn" id="st-perm-request">Allow browser notifications</button>`
+          }
+          ${notifStatus ? `<div class="st-perm-status">${escapeHtml(notifStatus)}</div>` : ''}
+          <div class="st-settings-note">This only fires while this window/tab stays open — there's no background service, so closing the tab or your browser stops reminders. If you'd rather not rely on that, the banners below the header will remind you whenever you open the app and haven't logged yet.</div>
+        </div>
+        <div class="st-settings-card" style="margin-top:12px;">
+          <div class="st-eyebrow">Backup &amp; restore</div>
+          <div class="st-h2">Save all your data</div>
+          <div class="st-settings-note" style="margin-top:0;">Your entries live in this browser only — clearing site data or switching devices loses them. Download a backup file regularly and keep it somewhere safe (Google Drive, email to yourself). Restore it anytime, on any device running this app.</div>
+          <button class="st-perm-btn" id="st-backup-btn" style="margin-top:10px;">Download backup (.json)</button>
+          <button class="st-perm-btn" id="st-restore-btn" style="margin-top:8px; background: var(--fern);">Restore from backup file</button>
+          <input type="file" id="st-restore-file" accept="application/json" style="display:none;">
+          ${backupStatus ? `<div class="st-perm-status">${escapeHtml(backupStatus)}</div>` : ''}
+        </div>
+      </div>
+    `;
+    document.getElementById('st-notif-toggle').addEventListener('click', async () => {
+      notifSettings.enabled = !notifSettings.enabled;
+      if (notifSettings.enabled && typeof Notification !== 'undefined' && Notification.permission === 'default') {
+        try { await Notification.requestPermission(); } catch(e) {}
+      }
+      await persistNotifSettings();
+      renderSettings();
+      render();
+    });
+    document.getElementById('st-notif-time').addEventListener('change', async e => {
+      notifSettings.time = e.target.value;
+      await persistNotifSettings();
+    });
+    const permBtn = document.getElementById('st-perm-request');
+    if (permBtn) {
+      permBtn.addEventListener('click', async () => {
+        try {
+          const result = await Notification.requestPermission();
+          notifStatus = result === 'granted' ? 'Notifications enabled.' : 'Permission not granted — your browser may be blocking requests from embedded content.';
+        } catch(e) {
+          notifStatus = 'This browser/context does not allow notification requests here.';
+        }
+        renderSettings();
+      });
+    }
+    document.getElementById('st-backup-btn').addEventListener('click', downloadBackup);
+    document.getElementById('st-restore-btn').addEventListener('click', () => document.getElementById('st-restore-file').click());
+    document.getElementById('st-restore-file').addEventListener('change', restoreBackup);
+  }
+
+  async function downloadBackup(){
+    try {
+      const data = {};
+      data['goals-active'] = goals;
+      data['goals-avoid'] = avoidList;
+      data['notif-settings'] = notifSettings;
+      let dates = [];
+      try {
+        const r = await window.storage.get('active-dates');
+        if (r && r.value) dates = JSON.parse(r.value);
+      } catch(e) {}
+      data['active-dates'] = dates;
+      data['checkins'] = {};
+      for (const d of dates) {
+        try {
+          const r = await window.storage.get('checkins:' + d);
+          if (r && r.value) data['checkins'][d] = JSON.parse(r.value);
+        } catch(e) {}
+      }
+      data['weekly'] = {};
+      try {
+        const listResult = await window.storage.list('weekly:');
+        const weekKeys = (listResult && listResult.keys) ? listResult.keys : [];
+        for (const k of weekKeys) {
+          try {
+            const r = await window.storage.get(k);
+            if (r && r.value) data['weekly'][k.replace('weekly:','')] = JSON.parse(r.value);
+          } catch(e) {}
+        }
+      } catch(e) {}
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'the-system-backup-' + todayKey + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      backupStatus = 'Backup downloaded.';
+      renderSettings();
+    } catch(e) {
+      backupStatus = 'Could not create backup — try again.';
+      renderSettings();
+      console.error(e);
+    }
+  }
+
+  function restoreBackup(e){
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if (data['goals-active']) await window.storage.set('goals-active', JSON.stringify(data['goals-active']));
+        if (data['goals-avoid']) await window.storage.set('goals-avoid', JSON.stringify(data['goals-avoid']));
+        if (data['notif-settings']) await window.storage.set('notif-settings', JSON.stringify(data['notif-settings']));
+        if (data['active-dates']) await window.storage.set('active-dates', JSON.stringify(data['active-dates']));
+        if (data['checkins']) {
+          for (const d of Object.keys(data['checkins'])) {
+            await window.storage.set('checkins:' + d, JSON.stringify(data['checkins'][d]));
+          }
+        }
+        if (data['weekly']) {
+          for (const w of Object.keys(data['weekly'])) {
+            await window.storage.set('weekly:' + w, JSON.stringify(data['weekly'][w]));
+          }
+        }
+        backupStatus = 'Restored — reloading...';
+        renderSettings();
+        setTimeout(() => location.reload(), 900);
+      } catch(err) {
+        backupStatus = 'That file could not be read as a valid backup.';
+        renderSettings();
+        console.error(err);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  async function persistNotifSettings(){
+    try { await window.storage.set('notif-settings', JSON.stringify(notifSettings)); } catch(e) {}
+  }
+
+  function checkReminders(){
+    if (!notifSettings.enabled) return;
+    if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2,'0');
+    const mm = String(now.getMinutes()).padStart(2,'0');
+    const nowStr = hh + ':' + mm;
+    const fireKey = todayKey + '_' + nowStr;
+    if (nowStr === notifSettings.time && notifFiredKey !== fireKey) {
+      notifFiredKey = fireKey;
+      if (!savedToday) {
+        try { new Notification('Time to log today', { body: "You haven't logged your systems, health check, or stress note yet — takes under a minute." }); } catch(e) {}
+      }
+    }
+  }
+
+  function renderToday(){
+    const view = document.getElementById('st-view-today');
+    const dGoals = dailyGoals();
+    const dayOfWeek = today.getDay(); // 0 Sun .. 6 Sat
+    const nearWeekEnd = (dayOfWeek === 0 || dayOfWeek === 6);
+    view.innerHTML = `
+      ${!savedToday ? '<div class="st-banner"><span>You haven\'t logged today yet.</span></div>' : ''}
+      ${(!savedWeekly && nearWeekEnd) ? '<div class="st-banner"><span>Weekly review is waiting — gratitude deep dive + goal check.</span></div>' : ''}
+      <div class="st-quote-card">
+        <div class="st-quote-mark">“</div>
+        <div class="st-quote-text">${escapeHtml(dailyQuote().text)}</div>
+        <div class="st-quote-author">— ${escapeHtml(dailyQuote().author)}</div>
+      </div>
+      <div class="st-card">
+        <div class="st-eyebrow">Health check</div>
+        <div class="st-h2">The five basics</div>
+        <div class="st-p">Sleep, sunlight, movement, nutrition, people — tap what you've covered today.</div>
+        <div class="st-pillars" id="st-pillars"></div>
+      </div>
+
+      <div class="st-card">
+        <div class="st-eyebrow">Today's systems</div>
+        <div class="st-h2">Run the process</div>
+        <div class="st-p">Not a score — just did you show up for the system, yes or no.</div>
+        <div id="st-daily-goals">
+          ${dGoals.length === 0 ? '<div class="st-empty">No daily goals yet. Add one in the Goals tab.</div>' : ''}
+        </div>
+      </div>
+
+      <div class="st-card">
+        <div class="st-eyebrow">In the moment</div>
+        <div class="st-h2">Feeling stressed?</div>
+        <button class="st-stress-btn" id="st-stress-open">Try a physiological sigh (30 seconds)</button>
+        <div id="st-sigh-area"></div>
+        <label class="st-label">Is this within your control?</label>
+        <textarea class="st-note" id="st-stress-note" placeholder="Name the stressor. If it's in your control, what's the one action that resolves it? If not, note it and set it down.">${escapeHtml(todayEntry.stressNote)}</textarea>
+      </div>
+
+      <button class="st-save" id="st-save-today">Save today</button>
+      <div class="st-status" id="st-status-today"></div>
+    `;
+
+    const pillarsEl = document.getElementById('st-pillars');
+    pillarsEl.innerHTML = PILLARS.map(p => `
+      <div class="st-pillar ${todayEntry.pillars[p.key] ? 'on' : ''}" data-key="${p.key}">
+        <span class="st-pillar-icon">${p.icon}</span>${p.label}
+      </div>
+    `).join('');
+    pillarsEl.querySelectorAll('.st-pillar').forEach(el => {
+      el.addEventListener('click', () => {
+        const k = el.dataset.key;
+        todayEntry.pillars[k] = !todayEntry.pillars[k];
+        el.classList.toggle('on');
+      });
+    });
+
+    const dailyGoalsEl = document.getElementById('st-daily-goals');
+    if (dGoals.length) {
+      dailyGoalsEl.innerHTML = dGoals.map(g => `
+        <div class="st-goal-check">
+          <div class="st-check-circle ${todayEntry.goalChecks[g.id] ? 'done' : ''}" data-id="${g.id}"></div>
+          <div class="st-goal-check-text">
+            <div class="st-goal-check-title">${escapeHtml(g.title)}</div>
+            <div class="st-goal-check-sub">${escapeHtml(g.system)}</div>
+          </div>
+        </div>
+      `).join('');
+      dailyGoalsEl.querySelectorAll('.st-check-circle').forEach(el => {
+        el.addEventListener('click', () => {
+          const id = el.dataset.id;
+          todayEntry.goalChecks[id] = !todayEntry.goalChecks[id];
+          el.classList.toggle('done');
+        });
+      });
+    }
+
+    document.getElementById('st-stress-note').addEventListener('input', e => { todayEntry.stressNote = e.target.value; });
+    document.getElementById('st-stress-open').addEventListener('click', startSigh);
+    document.getElementById('st-save-today').addEventListener('click', saveToday);
+  }
+
+  function startSigh(){
+    const area = document.getElementById('st-sigh-area');
+    area.innerHTML = `
+      <div class="st-sigh-box">
+        <div class="st-sigh-circle" id="st-sigh-circle"></div>
+        <div class="st-sigh-label" id="st-sigh-label">Get ready...</div>
+        <div class="st-sigh-instructions">Two short inhales through the nose, then one long, slow exhale through the mouth. This is the fastest voluntary way to bring your heart rate down.</div>
+      </div>
+    `;
+    const circle = document.getElementById('st-sigh-circle');
+    const label = document.getElementById('st-sigh-label');
+    const sequence = [
+      {t:800,  text:'Inhale (short)'},
+      {t:600,  text:'Inhale again (top up)'},
+      {t:5000, text:'Long exhale...'},
+    ];
+    let delay = 300;
+    sequence.forEach((step, i) => {
+      setTimeout(() => {
+        label.textContent = step.text;
+        if (step.text.startsWith('Inhale')) circle.classList.add('expand');
+        else circle.classList.remove('expand');
+      }, delay);
+      delay += step.t;
+    });
+    setTimeout(() => { label.textContent = 'One more round, or come back anytime.'; }, delay);
+  }
+
+  function renderGoals(){
+    const view = document.getElementById('st-view-goals');
+    const atLimit = goals.length >= 5;
+    view.innerHTML = `
+      ${atLimit ? '<div class="st-limit-note">You\'ve got 5 active goals — the max. Buffett\'s rule: focus beats volume. Retire one before adding another, or park new ideas on the "not now" list.</div>' : ''}
+      <button class="st-add-goal-btn" id="st-open-goal-form">${atLimit ? '+ Add to "not now" list' : '+ Add a specific goal'}</button>
+      <div class="st-goal-form" id="st-goal-form"></div>
+      <div id="st-goal-list"></div>
+      <div class="st-card" id="st-avoid-card" style="display:none;">
+        <div class="st-eyebrow">Not now</div>
+        <div class="st-h2">Avoid-for-now list</div>
+        <div class="st-p">These matter too — but they wait until one of your 5 is done.</div>
+        <div class="st-avoid-list" id="st-avoid-list"></div>
+      </div>
+    `;
+    document.getElementById('st-open-goal-form').addEventListener('click', () => { goalFormOpen = true; renderGoalForm(atLimit); });
+
+    const listEl = document.getElementById('st-goal-list');
+    if (goals.length === 0) {
+      listEl.innerHTML = '<div class="st-empty">No goals yet — add your first one above.</div>';
+    } else {
+      listEl.innerHTML = goals.map(g => {
+        const last10 = (g.checkins||[]).slice(-10);
+        const dots = Array.from({length:10}).map((_,i) => {
+          const hit = i >= (10 - last10.length);
+          return `<div class="st-trail-dot ${hit?'hit':''}"></div>`;
+        }).join('');
+        const count = (g.checkins||[]).length;
+        return `
+          <div class="st-goal-card">
+            <div class="st-goal-top">
+              <div class="st-goal-title">${escapeHtml(g.title)}</div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div class="st-goal-cadence">${g.cadence}</div>
+                <button class="st-goal-remove" data-id="${g.id}" title="Remove">✕</button>
+              </div>
+            </div>
+            ${g.identity ? `<div class="st-goal-identity">"${escapeHtml(g.identity)}"</div>` : ''}
+            <div class="st-goal-system"><b>System:</b> ${escapeHtml(g.system)}</div>
+            ${g.measure ? `<div class="st-goal-system"><b>Signal it's working:</b> ${escapeHtml(g.measure)}</div>` : ''}
+            <div class="st-trail">${dots}</div>
+            <div class="st-goal-count">${count} check-in${count===1?'':'s'} total</div>
+          </div>
+        `;
+      }).join('');
+      listEl.querySelectorAll('.st-goal-remove').forEach(btn => {
+        btn.addEventListener('click', e => {
+          const id = e.target.closest('.st-goal-remove').dataset.id;
+          goals = goals.filter(g => g.id !== id);
+          persistGoals();
+          renderGoals();
+        });
+      });
+    }
+
+    if (avoidList.length) {
+      document.getElementById('st-avoid-card').style.display = 'block';
+      document.getElementById('st-avoid-list').innerHTML = avoidList.map(a => `
+        <div class="st-avoid-item">
+          <span>${escapeHtml(a.title)}</span>
+          <button class="st-promote-btn" data-id="${a.id}" ${goals.length>=5?'disabled':''}>Promote</button>
+        </div>
+      `).join('');
+      document.getElementById('st-avoid-list').querySelectorAll('.st-promote-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          if (goals.length >= 5) return;
+          const id = e.target.dataset.id;
+          const item = avoidList.find(a => a.id === id);
+          avoidList = avoidList.filter(a => a.id !== id);
+          goals.push({ id: uid(), title: item.title, why:'', identity:'', system:'Define a system for this goal', cadence:'daily', measure:'', checkins:[] });
+          persistGoals(); persistAvoid();
+          renderGoals();
+        });
+      });
+    }
+  }
+
+  function renderGoalForm(atLimit){
+    const formEl = document.getElementById('st-goal-form');
+    if (!goalFormOpen) { formEl.classList.remove('open'); formEl.innerHTML=''; return; }
+    formEl.classList.add('open');
+    let cadence = 'daily';
+    formEl.innerHTML = `
+      <div class="st-goal-form-card">
+        <div class="st-eyebrow">New goal</div>
+        <div class="st-h2">Make it specific</div>
+        <label class="st-label">What do you want to achieve?</label>
+        <input class="st-input" id="st-f-title" placeholder="e.g. Run a half marathon">
+        <label class="st-label">Why does this matter to you?</label>
+        <textarea class="st-note" id="st-f-why" placeholder="The real reason — not the polished version"></textarea>
+        <label class="st-label">Who do you become by doing this consistently?</label>
+        <input class="st-input" id="st-f-identity" placeholder="e.g. I'm someone who runs, rain or shine">
+        <label class="st-label">What's the specific, repeatable action — your system?</label>
+        <input class="st-input" id="st-f-system" placeholder="e.g. Run 20 minutes every morning">
+        <label class="st-label">How often does this system run?</label>
+        <div class="st-radio-row">
+          <div class="st-radio-opt sel" data-val="daily" id="st-cad-daily">Daily</div>
+          <div class="st-radio-opt" data-val="weekly" id="st-cad-weekly">Weekly</div>
+        </div>
+        <label class="st-label">How will you know it's working? (a signal, not a percentage)</label>
+        <input class="st-input" id="st-f-measure" placeholder="e.g. I can run 20 minutes without stopping">
+        <div class="st-form-actions">
+          <button class="st-btn-cancel" id="st-f-cancel">Cancel</button>
+          <button class="st-btn-save-goal" id="st-f-save">${atLimit ? 'Add to not-now list' : 'Add goal'}</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('st-cad-daily').addEventListener('click', () => { cadence='daily'; document.getElementById('st-cad-daily').classList.add('sel'); document.getElementById('st-cad-weekly').classList.remove('sel'); });
+    document.getElementById('st-cad-weekly').addEventListener('click', () => { cadence='weekly'; document.getElementById('st-cad-weekly').classList.add('sel'); document.getElementById('st-cad-daily').classList.remove('sel'); });
+    document.getElementById('st-f-cancel').addEventListener('click', () => { goalFormOpen = false; renderGoalForm(atLimit); });
+    document.getElementById('st-f-save').addEventListener('click', () => {
+      const title = document.getElementById('st-f-title').value.trim();
+      if (!title) { document.getElementById('st-f-title').focus(); return; }
+      if (atLimit) {
+        avoidList.push({ id: uid(), title });
+        persistAvoid();
+      } else {
+        goals.push({
+          id: uid(),
+          title,
+          why: document.getElementById('st-f-why').value.trim(),
+          identity: document.getElementById('st-f-identity').value.trim(),
+          system: document.getElementById('st-f-system').value.trim() || 'Show up for it',
+          cadence,
+          measure: document.getElementById('st-f-measure').value.trim(),
+          checkins: []
+        });
+        persistGoals();
+      }
+      goalFormOpen = false;
+      renderGoals();
+    });
+  }
+
+  function renderWeekly(){
+    const view = document.getElementById('st-view-weekly');
+    const wGoals = goals;
+    view.innerHTML = `
+      <div class="st-card">
+        <div class="st-eyebrow">Gratitude · deep dive</div>
+        <div class="st-h2">One thing, in depth</div>
+        <div class="st-p">Research on gratitude journaling finds depth beats breadth, and doing this weekly (not daily) keeps it from going flat. Pick just one thing.</div>
+        <label class="st-label">What's one thing from this week you're grateful for?</label>
+        <input class="st-input" id="st-g-thing" value="${escapeHtml(weekEntry.gratThing)}" placeholder="Be specific — a moment, not a category">
+        <label class="st-label">Why does it matter?</label>
+        <textarea class="st-note" id="st-g-why" placeholder="Go deep, not wide">${escapeHtml(weekEntry.gratWhy)}</textarea>
+        <label class="st-label">What would this week have looked like without it?</label>
+        <textarea class="st-note" id="st-g-subtract" placeholder="The subtraction technique — often reveals more than listing more things">${escapeHtml(weekEntry.gratSubtract)}</textarea>
+        <label class="st-label">Is there a person connected to this you could thank directly?</label>
+        <input class="st-input" id="st-g-person" value="${escapeHtml(weekEntry.gratPerson)}" placeholder="Gratitude aimed at people lands harder than gratitude for things">
+      </div>
+
+      <div class="st-card">
+        <div class="st-eyebrow">Goals · review</div>
+        <div class="st-h2">What ran, what didn't</div>
+        <div id="st-weekly-goals">
+          ${wGoals.length === 0 ? '<div class="st-empty">No goals yet.</div>' : ''}
+        </div>
+      </div>
+
+      <div class="st-card">
+        <div class="st-eyebrow">Stress · reflection</div>
+        <div class="st-h2">Zoom out</div>
+        <label class="st-label">What was the biggest stressor this week — and was it in your control?</label>
+        <textarea class="st-note" id="st-stress-week" placeholder="If yes: what's the one action that resolves it next week? If no: name it, then set it down.">${escapeHtml(weekEntry.stressReflection)}</textarea>
+      </div>
+
+      <button class="st-save" id="st-save-weekly">Save weekly review</button>
+      <div class="st-status" id="st-status-weekly"></div>
+    `;
+    const wGoalsEl = document.getElementById('st-weekly-goals');
+    if (wGoals.length) {
+      wGoalsEl.innerHTML = wGoals.map(g => {
+        const n = checkinsThisWeek(g);
+        return `
+          <div style="padding:10px 0; border-top:1px solid var(--line);">
+            <div class="st-goal-check-title">${escapeHtml(g.title)} <span style="color:var(--stone); font-weight:400; font-size:12px;">— ${n} check-in${n===1?'':'s'} this week</span></div>
+            <textarea class="st-note" data-goal-id="${g.id}" placeholder="What worked, what got in the way, any tweak to the system?">${escapeHtml(weekEntry.goalNotes[g.id] || '')}</textarea>
+          </div>
+        `;
+      }).join('');
+      wGoalsEl.querySelectorAll('textarea').forEach(t => {
+        t.addEventListener('input', e => { weekEntry.goalNotes[e.target.dataset.goalId] = e.target.value; });
+      });
+    }
+    document.getElementById('st-g-thing').addEventListener('input', e => weekEntry.gratThing = e.target.value);
+    document.getElementById('st-g-why').addEventListener('input', e => weekEntry.gratWhy = e.target.value);
+    document.getElementById('st-g-subtract').addEventListener('input', e => weekEntry.gratSubtract = e.target.value);
+    document.getElementById('st-g-person').addEventListener('input', e => weekEntry.gratPerson = e.target.value);
+    document.getElementById('st-stress-week').addEventListener('input', e => weekEntry.stressReflection = e.target.value);
+    document.getElementById('st-save-weekly').addEventListener('click', saveWeekly);
+  }
+
+  function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  async function persistGoals(){
+    try { await window.storage.set('goals-active', JSON.stringify(goals)); } catch(e) { console.error(e); }
+  }
+  async function persistAvoid(){
+    try { await window.storage.set('goals-avoid', JSON.stringify(avoidList)); } catch(e) { console.error(e); }
+  }
+
+  async function saveToday(){
+    const btn = document.getElementById('st-save-today');
+    const status = document.getElementById('st-status-today');
+    btn.textContent = 'Saving...';
+    try {
+      // stamp checkins onto goals
+      Object.keys(todayEntry.goalChecks).forEach(id => {
+        if (todayEntry.goalChecks[id]) {
+          const g = goals.find(x => x.id === id);
+          if (g) {
+            g.checkins = g.checkins || [];
+            if (!g.checkins.includes(todayKey)) g.checkins.push(todayKey);
+          }
+        }
+      });
+      await persistGoals();
+      await window.storage.set('checkins:' + todayKey, JSON.stringify(todayEntry));
+
+      let dates = [];
+      try {
+        const r = await window.storage.get('active-dates');
+        if (r && r.value) dates = JSON.parse(r.value);
+      } catch(e) {}
+      if (!dates.includes(todayKey)) dates.push(todayKey);
+      dates.sort();
+      await window.storage.set('active-dates', JSON.stringify(dates));
+      streak = computeStreak(dates);
+
+      savedToday = true;
+      btn.textContent = 'Saved ✓';
+      btn.classList.add('saved');
+      status.textContent = 'Logged for today.';
+      setTimeout(() => { btn.textContent = 'Save today'; btn.classList.remove('saved'); }, 1600);
+      render();
+    } catch(err) {
+      btn.textContent = 'Save today';
+      status.textContent = 'Could not save — try again.';
+      console.error(err);
+    }
+  }
+
+  async function saveWeekly(){
+    const btn = document.getElementById('st-save-weekly');
+    const status = document.getElementById('st-status-weekly');
+    btn.textContent = 'Saving...';
+    try {
+      await window.storage.set('weekly:' + weekKey, JSON.stringify(weekEntry));
+      savedWeekly = true;
+      btn.textContent = 'Saved ✓';
+      btn.classList.add('saved');
+      status.textContent = 'Weekly review logged.';
+      setTimeout(() => { btn.textContent = 'Save weekly review'; btn.classList.remove('saved'); }, 1600);
+    } catch(err) {
+      btn.textContent = 'Save weekly review';
+      status.textContent = 'Could not save — try again.';
+      console.error(err);
+    }
+  }
+
+  function computeStreak(dates){
+    const set = new Set(dates);
+    let s = 0;
+    let cursor = new Date(today);
+    while (set.has(dayKey(cursor))) { s++; cursor.setDate(cursor.getDate()-1); }
+    return s;
+  }
+
+  async function loadAll(){
+    try {
+      const r = await window.storage.get('goals-active');
+      if (r && r.value) goals = JSON.parse(r.value);
+    } catch(e) {}
+    try {
+      const r = await window.storage.get('goals-avoid');
+      if (r && r.value) avoidList = JSON.parse(r.value);
+    } catch(e) {}
+    try {
+      const r = await window.storage.get('checkins:' + todayKey);
+      if (r && r.value) { todayEntry = JSON.parse(r.value); savedToday = true; }
+    } catch(e) {}
+    try {
+      const r = await window.storage.get('weekly:' + weekKey);
+      if (r && r.value) { weekEntry = JSON.parse(r.value); savedWeekly = true; }
+    } catch(e) {}
+    try {
+      const r = await window.storage.get('active-dates');
+      if (r && r.value) streak = computeStreak(JSON.parse(r.value));
+    } catch(e) {}
+    try {
+      const r = await window.storage.get('notif-settings');
+      if (r && r.value) notifSettings = JSON.parse(r.value);
+    } catch(e) {}
+    render();
+    setInterval(checkReminders, 20000);
+  }
+
+  loadAll();
+})();
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js').catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>
